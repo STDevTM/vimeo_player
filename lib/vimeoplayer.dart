@@ -7,11 +7,7 @@ import 'src/quality_links.dart';
 import 'dart:async';
 import 'src/fullscreen_player.dart';
 
-enum PlayerState {
-  play,
-  pause,
-  end
-}
+enum PlayerState { play, pause, end }
 
 //Класс видео плеера
 class VimeoPlayer extends StatefulWidget {
@@ -102,7 +98,8 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
 
   _videoPlayerStateChanged() {
     // If video is ended
-    if (_controller.value.position == _controller.value.duration && widget.onStateChange != null) {
+    if (_controller.value.position == _controller.value.duration &&
+        widget.onStateChange != null) {
       widget.onStateChange(PlayerState.end);
     }
   }
@@ -195,8 +192,8 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
               margin: EdgeInsets.fromLTRB(
                   0, 10, doubleTapLWidth / 2 + 30, doubleTapLMargin + 20),
               decoration: BoxDecoration(
-                //color: Colors.red,
-              ),
+                  //color: Colors.red,
+                  ),
             ),
 
             // Изменение размера блоков дабл тапа. Нужно для открытия кнопок
@@ -231,8 +228,8 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
               margin: EdgeInsets.fromLTRB(doubleTapRWidth / 2 + 45,
                   doubleTapRMargin, 0, doubleTapRMargin + 20),
               decoration: BoxDecoration(
-                //color: Colors.red,
-              ),
+                  //color: Colors.red,
+                  ),
             ),
             // Изменение размера блоков дабл тапа. Нужно для открытия кнопок
             // "Во весь экран" и "Качество" при включенном overlay
@@ -295,14 +292,12 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
 
   //================================ OVERLAY ================================//
   Widget _videoOverlay() {
-
-    if (_overlay) {
-      Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(Duration(seconds: 3), () {
+      if (_overlay)
         setState(() {
           _overlay = !_overlay;
         });
-      });
-    }
+    });
 
     return _overlay
         ? Stack(
@@ -339,9 +334,15 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                             ? _controller.pause()
                             : _controller.play();
 
-                        final state = _controller.value.isPlaying ? PlayerState.play : PlayerState.end;
+                        final state = _controller.value.isPlaying
+                            ? PlayerState.play
+                            : PlayerState.end;
 
-                        if (widget.onStateChange != null) widget.onStateChange(state);
+                        print('state changed');
+                        print(widget.onStateChange.toString());
+
+                        if (widget.onStateChange != null)
+                          widget.onStateChange(state);
                       });
                     }),
               ),
