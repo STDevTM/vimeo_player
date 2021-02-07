@@ -315,7 +315,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                             : _controller.play();
 
                         if (_overlay && _controller.value.isPlaying) {
-                          Future.delayed(Duration(seconds: 1), () {
+                          Future.delayed(Duration(seconds: 2), () {
                             setState(() {
                               _overlay = !_overlay;
                             });
