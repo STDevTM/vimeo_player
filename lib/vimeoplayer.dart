@@ -7,20 +7,26 @@ import 'src/quality_links.dart';
 import 'dart:async';
 import 'src/fullscreen_player.dart';
 
+enum PlayerState {
+  play,
+  pause,
+  end
+}
+
 //Класс видео плеера
 class VimeoPlayer extends StatefulWidget {
   final String id;
   final bool autoPlay;
   final bool looping;
   final int position;
-  final VoidCallback onVideoEnd;
+  final Function(PlayerState) onStateChange;
 
   VimeoPlayer({
     @required this.id,
     this.autoPlay,
     this.looping,
     this.position,
-    this.onVideoEnd,
+    this.onStateChange,
     Key key,
   }) : super(key: key);
 
@@ -96,8 +102,8 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
 
   _videoPlayerStateChanged() {
     // If video is ended
-    if (_controller.value.position == _controller.value.duration && widget.onVideoEnd != null) {
-      widget.onVideoEnd();
+    if (_controller.value.position == _controller.value.duration && widget.onStateChange != null) {
+      widget.onStateChange(PlayerState.end);
     }
   }
 
@@ -289,6 +295,15 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
 
   //================================ OVERLAY ================================//
   Widget _videoOverlay() {
+
+    if (_overlay) {
+      Future.delayed(Duration(seconds: 2), () {
+        setState(() {
+          _overlay = !_overlay;
+        });
+      });
+    }
+
     return _overlay
         ? Stack(
             children: <Widget>[
@@ -324,13 +339,9 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                             ? _controller.pause()
                             : _controller.play();
 
-                        if (_overlay && _controller.value.isPlaying) {
-                          Future.delayed(Duration(seconds: 2), () {
-                            setState(() {
-                              _overlay = !_overlay;
-                            });
-                          });
-                        }
+                        final state = _controller.value.isPlaying ? PlayerState.play : PlayerState.end;
+
+                        if (widget.onStateChange != null) widget.onStateChange(state);
                       });
                     }),
               ),
