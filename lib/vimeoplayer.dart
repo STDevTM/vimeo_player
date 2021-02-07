@@ -88,6 +88,12 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
         [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
 
+    Future.delayed(Duration(seconds: 1), () {
+      setState(() {
+        _overlay = !_overlay;
+      });
+    });
+
     super.initState();
   }
 
