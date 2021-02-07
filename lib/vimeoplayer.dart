@@ -13,12 +13,14 @@ class VimeoPlayer extends StatefulWidget {
   final bool autoPlay;
   final bool looping;
   final int position;
+  final VoidCallback onVideoEnd;
 
   VimeoPlayer({
     @required this.id,
     this.autoPlay,
     this.looping,
     this.position,
+    this.onVideoEnd,
     Key key,
   }) : super(key: key);
 
@@ -83,12 +85,21 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
       });
     });
 
+    _controller.addListener(_videoPlayerStateChanged);
+
     //На странице видео преимущество за портретной ориентацией
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
 
     super.initState();
+  }
+
+  _videoPlayerStateChanged() {
+    // If video is ended
+    if (_controller.value.position == _controller.value.duration && widget.onVideoEnd != null) {
+      widget.onVideoEnd();
+    }
   }
 
   //Отрисовываем элементы плеера
