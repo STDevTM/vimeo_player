@@ -75,6 +75,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
       _qualityValue = value[value.lastKey()];
       _controller = VideoPlayerController.network(_qualityValue);
       _controller.setLooping(looping);
+      _controller.addListener(_videoPlayerStateChanged);
       if (autoPlay) _controller.play();
       initFuture = _controller.initialize();
 
@@ -84,8 +85,6 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
             [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
       });
     });
-
-    _controller.addListener(_videoPlayerStateChanged);
 
     //На странице видео преимущество за портретной ориентацией
     SystemChrome.setPreferredOrientations(
