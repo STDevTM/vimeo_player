@@ -88,12 +88,6 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
         [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
 
-    Future.delayed(Duration(seconds: 1), () {
-      setState(() {
-        _overlay = !_overlay;
-      });
-    });
-
     super.initState();
   }
 
@@ -319,6 +313,14 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                         _controller.value.isPlaying
                             ? _controller.pause()
                             : _controller.play();
+
+                        if (_overlay && _controller.value.isPlaying) {
+                          Future.delayed(Duration(seconds: 1), () {
+                            setState(() {
+                              _overlay = !_overlay;
+                            });
+                          });
+                        }
                       });
                     }),
               ),
