@@ -344,11 +344,8 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                             ? PlayerState.play
                             : PlayerState.end;
 
-                        if (widget.onStateChange != null) {
-                          print('statechange and can be reported');
-
+                        if (widget.onStateChange != null)
                           widget.onStateChange(state);
-                        }
                       });
                     }),
               ),
