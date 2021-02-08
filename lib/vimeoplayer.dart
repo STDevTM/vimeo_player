@@ -39,6 +39,9 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
   bool fullScreen = false;
   int position;
 
+  // Overlay timer
+  Timer _timer;
+
   _VimeoPlayerState(this._id, this.autoPlay, this.looping, this.position);
 
   //Custom controller
@@ -292,7 +295,10 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
 
   //================================ OVERLAY ================================//
   Widget _videoOverlay() {
-    Future.delayed(Duration(seconds: 3), () {
+    if (_timer != null) _timer.cancel();
+
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      timer.cancel();
       if (_overlay)
         setState(() {
           _overlay = !_overlay;
@@ -338,11 +344,11 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                             ? PlayerState.play
                             : PlayerState.end;
 
-                        print('state changed');
-                        print(widget.onStateChange.toString());
+                        if (widget.onStateChange != null) {
+                          print('statechange and can be reported');
 
-                        if (widget.onStateChange != null)
                           widget.onStateChange(state);
+                        }
                       });
                     }),
               ),
