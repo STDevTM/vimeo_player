@@ -113,6 +113,7 @@ class _FullscreenPlayerState extends State<FullscreenPlayer> {
     return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
+          backgroundColor: Colors.black,
             body: Center(
                 child: Stack(
           alignment: AlignmentDirectional.center,
