@@ -444,4 +444,11 @@ class _FullscreenPlayerState extends State<FullscreenPlayer> {
       },
     );
   }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+
+    super.dispose();
+  }
 }
