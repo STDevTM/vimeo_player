@@ -57,6 +57,9 @@ class _FullscreenPlayerState extends State<FullscreenPlayer> {
   //Переменная перемотки
   bool _seek = true;
 
+  // Overlay timer
+  Timer _timer;
+
   //Переменные видео
   double videoHeight;
   double videoWidth;
@@ -303,6 +306,17 @@ class _FullscreenPlayerState extends State<FullscreenPlayer> {
 
   //================================ OVERLAY ================================//
   Widget _videoOverlay() {
+
+    if (_timer != null) _timer.cancel();
+
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      timer.cancel();
+      if (_overlay)
+        setState(() {
+          _overlay = !_overlay;
+        });
+    });
+
     return _overlay
         ? Stack(
             children: <Widget>[
