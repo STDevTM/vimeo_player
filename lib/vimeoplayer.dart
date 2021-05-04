@@ -47,7 +47,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
   int position;
 
   // Overlay timer
-  Timer? _timer;
+  Timer _timer;
 
   _VimeoPlayerState(this._id, this.autoPlay, this.looping, this.position);
 
@@ -98,10 +98,10 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
       _qualityValues = value;
       _qualityValue = value[value.lastKey()];
       _controller = VideoPlayerController.network(_qualityValue);
-      _controller!.setLooping(looping == null ? false : true);
-      _controller!.addListener(_videoPlayerStateChanged);
-      if (autoPlay!) _controller!.play();
-      initFuture = _controller!.initialize();
+      _controller.setLooping(looping == null ? false : true);
+      _controller.addListener(_videoPlayerStateChanged);
+      if (autoPlay) _controller.play();
+      initFuture = _controller.initialize();
 
       //Обновление состояние приложения и перерисовка
       setState(() {
@@ -123,7 +123,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
     // If video is ended
     if (_controller.value.position == _controller.value.duration &&
         widget.onStateChange != null) {
-      widget.onStateChange!(PlayerState.end);
+      widget.onStateChange(PlayerState.end);
     }
   }
 
@@ -144,7 +144,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                   //Управление шириной и высотой видео
                   double delta = MediaQuery.of(context).size.width -
                       MediaQuery.of(context).size.height *
-                          _controller!.value.aspectRatio;
+                          _controller.value.aspectRatio;
 
 // <<<<<<< HEAD
 //                   //Рассчет ширины и высоты видео плеера относительно сторон
@@ -192,7 +192,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                         height: videoHeight,
                         width: videoWidth,
                         margin: EdgeInsets.only(left: videoMargin),
-                        child: VideoPlayer(_controller!),
+                        child: VideoPlayer(_controller),
                       ),
                       _videoOverlay(),
                     ],
@@ -350,7 +350,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
               onTap: () => {
                     //Обновление состояние приложения и перерисовка
                     setState(() {
-                      _controller!.pause();
+                      _controller.pause();
                       _qualityValue = value;
 // <<<<<<< HEAD
 //                       _controller =
@@ -362,8 +362,8 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                       _controller.setLooping(true);
 // >>>>>>> parent of d9fbbc8... 0.1.8
                       _seek = true;
-                      initFuture = _controller!.initialize();
-                      _controller!.play();
+                      initFuture = _controller.initialize();
+                      _controller.play();
                     }),
                   }))));
 
@@ -377,7 +377,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
 
   //================================ OVERLAY ================================//
   Widget _videoOverlay() {
-    if (_timer != null) _timer!.cancel();
+    if (_timer != null) _timer.cancel();
 
     _timer = Timer.periodic(Duration(seconds: 3), (timer) {
       timer.cancel();
@@ -411,18 +411,18 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
               Center(
                 child: IconButton(
                     padding: EdgeInsets.only(
-                        top: videoHeight! / 2 - 30,
-                        bottom: videoHeight! / 2 - 30),
-                    icon: _controller!.value.isPlaying
+                        top: videoHeight / 2 - 30,
+                        bottom: videoHeight / 2 - 30),
+                    icon: _controller.value.isPlaying
                         ? Icon(Icons.pause, size: 60.0)
                         : Icon(Icons.play_arrow, size: 60.0),
                     onPressed: () {
                       setState(() {
-                        _controller!.value.isPlaying
-                            ? _controller!.pause()
-                            : _controller!.play();
+                        _controller.value.isPlaying
+                            ? _controller.pause()
+                            : _controller.play();
 
-                        final state = _controller!.value.isPlaying
+                        final state = _controller.value.isPlaying
                             ? PlayerState.play
                             : PlayerState.end;
 
@@ -526,7 +526,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
               width: videoWidth,
               margin: EdgeInsets.only(top: videoHeight - 5),
               child: VideoProgressIndicator(
-                _controller!,
+                _controller,
                 allowScrubbing: true,
                 colors: VideoProgressColors(
                   playedColor: Color(0xFF22A3D2),
@@ -542,9 +542,9 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
   //=================== ПОЛЗУНОК ===================//
   Widget _videoOverlaySlider() {
     return ValueListenableBuilder(
-      valueListenable: _controller!,
+      valueListenable: _controller,
       builder: (context, VideoPlayerValue value, child) {
-        if (!value.hasError && value.isInitialized) {
+        if (!value.hasError && value.initialized) {
           return Row(
             children: <Widget>[
               Container(
@@ -557,9 +557,9 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
               ),
               Container(
                 height: 20,
-                width: videoWidth! - 92,
+                width: videoWidth - 92,
                 child: VideoProgressIndicator(
-                  _controller!,
+                  _controller,
                   allowScrubbing: true,
                   colors: VideoProgressColors(
                     playedColor: Color(0xFF22A3D2),
@@ -588,8 +588,8 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
 
   @override
   void dispose() {
-    _controller!.dispose();
-    _timer!.cancel();
+    _controller.dispose();
+    _timer.cancel();
     super.dispose();
   }
 }

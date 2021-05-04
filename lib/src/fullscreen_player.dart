@@ -44,9 +44,9 @@ class _FullscreenPlayerState extends State<FullscreenPlayer> {
   VideoPlayerController controller;
   VideoPlayerController _controller;
 
-  int? position;
+  int position;
 
-  Future<void>? initFuture;
+  Future<void> initFuture;
   var qualityValue;
 
   _FullscreenPlayerState(this._id, this.autoPlay, this.looping, this.controller,
@@ -646,9 +646,9 @@ class _FullscreenPlayerState extends State<FullscreenPlayer> {
   //=================== ПОЛЗУНОК ===================//
   Widget _videoOverlaySlider() {
     return ValueListenableBuilder(
-      valueListenable: _controller!,
+      valueListenable: _controller,
       builder: (context, VideoPlayerValue value, child) {
-        if (!value.hasError && value.isInitialized) {
+        if (!value.hasError && value.initialized) {
           return Row(
             children: <Widget>[
               Container(
@@ -661,9 +661,9 @@ class _FullscreenPlayerState extends State<FullscreenPlayer> {
               ),
               Container(
                 height: 20,
-                width: videoWidth! - 92,
+                width: videoWidth - 92,
                 child: VideoProgressIndicator(
-                  _controller!,
+                  _controller,
                   allowScrubbing: true,
                   colors: VideoProgressColors(
                     playedColor: Color(0xFF22A3D2),
