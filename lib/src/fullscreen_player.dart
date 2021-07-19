@@ -282,157 +282,171 @@ class _FullscreenPlayerState extends State<FullscreenPlayer> {
 // =======
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-            child: Stack(
-          alignment: AlignmentDirectional.center,
-          children: <Widget>[
-            GestureDetector(
-              child: FutureBuilder(
-                  future: initFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      //Управление шириной и высотой видео
-                      double delta = MediaQuery.of(context).size.width -
-                          MediaQuery.of(context).size.height *
+    return WillPopScope(
+      onWillPop: () {
+        setState(() {
+          _controller.pause();
+          SystemChrome.setPreferredOrientations(
+              [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
+          SystemChrome.setEnabledSystemUIOverlays(
+              [SystemUiOverlay.top, SystemUiOverlay.bottom]);
+        });
+        Navigator.pop(context, _controller.value.position.inSeconds);
+
+        return Future.value(false);
+      },
+      child: Scaffold(
+          backgroundColor: Colors.black,
+          body: Center(
+              child: Stack(
+            alignment: AlignmentDirectional.center,
+            children: <Widget>[
+              GestureDetector(
+                child: FutureBuilder(
+                    future: initFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        //Управление шириной и высотой видео
+                        double delta = MediaQuery.of(context).size.width -
+                            MediaQuery.of(context).size.height *
+                                _controller.value.aspectRatio;
+                        if (MediaQuery.of(context).orientation ==
+                                Orientation.portrait ||
+                            delta < 0) {
+                          videoHeight = MediaQuery.of(context).size.width /
                               _controller.value.aspectRatio;
-                      if (MediaQuery.of(context).orientation ==
-                              Orientation.portrait ||
-                          delta < 0) {
-                        videoHeight = MediaQuery.of(context).size.width /
-                            _controller.value.aspectRatio;
-                        videoWidth = MediaQuery.of(context).size.width;
-                        videoMargin = 0;
+                          videoWidth = MediaQuery.of(context).size.width;
+                          videoMargin = 0;
+                        } else {
+                          videoHeight = MediaQuery.of(context).size.height;
+                          videoWidth =
+                              videoHeight * _controller.value.aspectRatio;
+                          videoMargin =
+                              (MediaQuery.of(context).size.width - videoWidth) /
+                                  2;
+                        }
+
+                        doubleTapRWidth = videoWidth;
+                        doubleTapRHeight = videoHeight - 36;
+                        doubleTapLWidth = videoWidth;
+                        doubleTapLHeight = videoHeight;
+
+                        if (_seek && fullScreen) {
+                          _controller.seekTo(Duration(seconds: position));
+                          _seek = false;
+                        }
+                        if (_seek && _controller.value.duration.inSeconds > 2) {
+                          _controller.seekTo(Duration(seconds: position));
+                          _seek = false;
+                        }
+                        SystemChrome.setEnabledSystemUIOverlays(
+                            [SystemUiOverlay.bottom]);
+                        //Отрисовка элементов плеера
+                        return Stack(
+                          children: <Widget>[
+                            Container(
+                              height: videoHeight,
+                              width: videoWidth,
+                              margin: EdgeInsets.only(left: videoMargin),
+                              child: VideoPlayer(_controller),
+                            ),
+                            _videoOverlay(),
+                          ],
+                        );
                       } else {
-                        videoHeight = MediaQuery.of(context).size.height;
-                        videoWidth =
-                            videoHeight * _controller.value.aspectRatio;
-                        videoMargin =
-                            (MediaQuery.of(context).size.width - videoWidth) /
-                                2;
+                        return Center(
+                            heightFactor: 6,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 4,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF22A3D2)),
+                            ));
                       }
-
-                      doubleTapRWidth = videoWidth;
+                    }),
+                onTap: () {
+                  setState(() {
+                    _overlay = !_overlay;
+                    if (_overlay) {
                       doubleTapRHeight = videoHeight - 36;
-                      doubleTapLWidth = videoWidth;
+                      doubleTapLHeight = videoHeight - 10;
+                      doubleTapRMargin = 36;
+                      doubleTapLMargin = 10;
+                    } else if (!_overlay) {
+                      doubleTapRHeight = videoHeight + 36;
                       doubleTapLHeight = videoHeight;
-
-                      if (_seek && fullScreen) {
-                        _controller.seekTo(Duration(seconds: position));
-                        _seek = false;
-                      }
-                      if (_seek && _controller.value.duration.inSeconds > 2) {
-                        _controller.seekTo(Duration(seconds: position));
-                        _seek = false;
-                      }
-                      SystemChrome.setEnabledSystemUIOverlays(
-                          [SystemUiOverlay.bottom]);
-                      //Отрисовка элементов плеера
-                      return Stack(
-                        children: <Widget>[
-                          Container(
-                            height: videoHeight,
-                            width: videoWidth,
-                            margin: EdgeInsets.only(left: videoMargin),
-                            child: VideoPlayer(_controller),
-                          ),
-                          _videoOverlay(),
-                        ],
-                      );
-                    } else {
-                      return Center(
-                          heightFactor: 6,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 4,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF22A3D2)),
-                          ));
+                      doubleTapRMargin = 0;
+                      doubleTapLMargin = 0;
                     }
+                  });
+                },
+              ),
+              GestureDetector(
+                  child: Container(
+                    width: doubleTapLWidth / 2 - 30,
+                    height: doubleTapLHeight - 44,
+                    margin:
+                        EdgeInsets.fromLTRB(0, 0, doubleTapLWidth / 2 + 30, 40),
+                    decoration: BoxDecoration(
+                        //color: Colors.red,
+                        ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _overlay = !_overlay;
+                      if (_overlay) {
+                        doubleTapRHeight = videoHeight - 36;
+                        doubleTapLHeight = videoHeight - 10;
+                        doubleTapRMargin = 36;
+                        doubleTapLMargin = 10;
+                      } else if (!_overlay) {
+                        doubleTapRHeight = videoHeight + 36;
+                        doubleTapLHeight = videoHeight;
+                        doubleTapRMargin = 0;
+                        doubleTapLMargin = 0;
+                      }
+                    });
+                  },
+                  onDoubleTap: () {
+                    setState(() {
+                      _controller.seekTo(Duration(
+                          seconds: _controller.value.position.inSeconds - 10));
+                    });
                   }),
-              onTap: () {
-                setState(() {
-                  _overlay = !_overlay;
-                  if (_overlay) {
-                    doubleTapRHeight = videoHeight - 36;
-                    doubleTapLHeight = videoHeight - 10;
-                    doubleTapRMargin = 36;
-                    doubleTapLMargin = 10;
-                  } else if (!_overlay) {
-                    doubleTapRHeight = videoHeight + 36;
-                    doubleTapLHeight = videoHeight;
-                    doubleTapRMargin = 0;
-                    doubleTapLMargin = 0;
-                  }
-                });
-              },
-            ),
-            GestureDetector(
-                child: Container(
-                  width: doubleTapLWidth / 2 - 30,
-                  height: doubleTapLHeight - 44,
-                  margin:
-                      EdgeInsets.fromLTRB(0, 0, doubleTapLWidth / 2 + 30, 40),
-                  decoration: BoxDecoration(
-                      //color: Colors.red,
-                      ),
-                ),
-                onTap: () {
-                  setState(() {
-                    _overlay = !_overlay;
-                    if (_overlay) {
-                      doubleTapRHeight = videoHeight - 36;
-                      doubleTapLHeight = videoHeight - 10;
-                      doubleTapRMargin = 36;
-                      doubleTapLMargin = 10;
-                    } else if (!_overlay) {
-                      doubleTapRHeight = videoHeight + 36;
-                      doubleTapLHeight = videoHeight;
-                      doubleTapRMargin = 0;
-                      doubleTapLMargin = 0;
-                    }
-                  });
-                },
-                onDoubleTap: () {
-                  setState(() {
-                    _controller.seekTo(Duration(
-                        seconds: _controller.value.position.inSeconds - 10));
-                  });
-                }),
-            GestureDetector(
-                child: Container(
-                  width: doubleTapRWidth / 2 - 45,
-                  height: doubleTapRHeight - 80,
-                  margin: EdgeInsets.fromLTRB(
-                      doubleTapRWidth / 2 + 45, 0, 0, doubleTapLMargin + 20),
-                  decoration: BoxDecoration(
-                      //color: Colors.red,
-                      ),
-                ),
-                onTap: () {
-                  setState(() {
-                    _overlay = !_overlay;
-                    if (_overlay) {
-                      doubleTapRHeight = videoHeight - 36;
-                      doubleTapLHeight = videoHeight - 10;
-                      doubleTapRMargin = 36;
-                      doubleTapLMargin = 10;
-                    } else if (!_overlay) {
-                      doubleTapRHeight = videoHeight + 36;
-                      doubleTapLHeight = videoHeight;
-                      doubleTapRMargin = 0;
-                      doubleTapLMargin = 0;
-                    }
-                  });
-                },
-                onDoubleTap: () {
-                  setState(() {
-                    _controller.seekTo(Duration(
-                        seconds: _controller.value.position.inSeconds + 10));
-                  });
-                }),
-          ],
-        )));
+              GestureDetector(
+                  child: Container(
+                    width: doubleTapRWidth / 2 - 45,
+                    height: doubleTapRHeight - 80,
+                    margin: EdgeInsets.fromLTRB(
+                        doubleTapRWidth / 2 + 45, 0, 0, doubleTapLMargin + 20),
+                    decoration: BoxDecoration(
+                        //color: Colors.red,
+                        ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _overlay = !_overlay;
+                      if (_overlay) {
+                        doubleTapRHeight = videoHeight - 36;
+                        doubleTapLHeight = videoHeight - 10;
+                        doubleTapRMargin = 36;
+                        doubleTapLMargin = 10;
+                      } else if (!_overlay) {
+                        doubleTapRHeight = videoHeight + 36;
+                        doubleTapLHeight = videoHeight;
+                        doubleTapRMargin = 0;
+                        doubleTapLMargin = 0;
+                      }
+                    });
+                  },
+                  onDoubleTap: () {
+                    setState(() {
+                      _controller.seekTo(Duration(
+                          seconds: _controller.value.position.inSeconds + 10));
+                    });
+                  }),
+            ],
+          ))),
+    );
 // >>>>>>> parent of d9fbbc8... 0.1.8
   }
 
